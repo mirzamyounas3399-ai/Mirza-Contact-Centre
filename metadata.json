@@ -1,0 +1,9 @@
+
+{
+  "name": "Mirza Contact Centre",
+  "description": "Professional secure communication platform for direct contact with Mirza Support.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
