@@ -6,7 +6,8 @@ import Auth from './components/Auth';
 import AdminDashboard from './components/AdminDashboard';
 import UserMessaging from './components/UserMessaging';
 import CallInterface from './components/CallInterface';
-import { storage } from './services/storage';
+import { api } from './services/api';
+import { wsService } from './services/websocket';
 
 const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -14,9 +15,13 @@ const App: React.FC = () => {
 
   useEffect(() => {
     // Check for existing session
+    const token = localStorage.getItem('nexus_token');
     const savedUser = localStorage.getItem('nexus_current_user');
-    if (savedUser) {
+    
+    if (token && savedUser) {
       setUser(JSON.parse(savedUser));
+      // Reconnect WebSocket
+      wsService.connect(token);
     }
     setLoading(false);
   }, []);
@@ -29,12 +34,13 @@ const App: React.FC = () => {
   const handleUpdateUser = (updatedUser: User) => {
     setUser(updatedUser);
     localStorage.setItem('nexus_current_user', JSON.stringify(updatedUser));
-    storage.updateUser(updatedUser);
   };
 
   const handleLogout = () => {
     setUser(null);
     localStorage.removeItem('nexus_current_user');
+    api.clearToken();
+    wsService.disconnect();
   };
 
   if (loading) {
